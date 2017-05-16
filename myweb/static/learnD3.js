@@ -6,7 +6,8 @@ var rectStep=35;
 var rectWidth=30;
 var dataset=[50,43,120,87,99,167,142];
 draw();
-//svg.append("circle").attr("cx","50px").attr("cy","50px").attr("r","50px").attr("fill","red");
+scale();
+scale2()
 function draw(){
     d3.select("svg").remove();
     var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
@@ -82,4 +83,45 @@ $("#add").on("click",function(){
     draw();
 });
 
+function scale(){
+    var svg=d3.select("body").append("svg")
+              .attr("width",width)
+              .attr("height",height);
+    var xScale=d3.scaleLinear()
+                 .domain([0,10])
+                 .range([0,300]);
+    var axis = d3.axisBottom()
+                .scale(xScale);
+
+    var axis1=d3.axisLeft().scale(xScale).ticks(5).tickSize(6)
+    .tickSizeInner(10).tickSizeOuter(88).tickFormat(d3.format("$0.1f"));
+    var axis2=d3.axisLeft().scale(xScale).tickValues([3,4,5,6]);
+    var axis3=d3.axisLeft().scale(xScale).tickArguments([10, "s"]);
+    var gAxis=svg.append("g").attr("transform","translate(80,80)");
+//    axis(gAxis);
+    axis1(gAxis);
+//    axis2(gAxis);
+//    axis3(gAxis);
+}
+
+function scale2(){
+    var svg=d3.select("body").append("svg")
+              .attr("width",width)
+              .attr("height",height);
+
+    var xScale=d3.scaleLinear()
+                 .domain([0,10])
+                 .rangeRound([0,300]);
+    var xScale2=d3.scalePow().exponent(2)
+                 .domain([0,10])
+                 .rangeRound([0,310]);
+
+    var xScale3=d3.scaleTime()
+                 .domain([new Date(2000, 0, 1, 0), new Date(2000, 0,1, 5)])
+                 .rangeRound([0,300]);
+    var axis=d3.axisBottom().scale(xScale3).ticks(d3.timeMinute.every(60));
+
+    var gAxis=svg.append("g").attr("transform","translate(80,80)");
+    gAxis.call(axis);
+}
 })
