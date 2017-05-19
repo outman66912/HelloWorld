@@ -1,13 +1,19 @@
 $(function(){
 var width=400;
 var height=400;
-var padding={top:20,right:20,bottom:20,left:20}
+var padding={top:20,right:20,bottom:20,left:80}
 var rectStep=35;
 var rectWidth=30;
 var dataset=[50,43,120,87,99,167,142];
-draw();
-scale();
-scale2()
+var xAxisWidth=300;
+var yAxisWidth=300;
+
+var center=[[0.5,0.5],[0.7,0.8],[0.4,0.9],[0.11,0.32],[0.88,0.25],[0.75,0.12],[0.5,0.1],[0.2,0.3],[0.4,0.1],[0.6,0.7]];
+//draw();
+//draw2();
+//scale();
+//scale2()
+eventBinding();
 function draw(){
     d3.select("svg").remove();
     var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
@@ -17,41 +23,53 @@ function draw(){
     var updateText=svg.selectAll(".text").data(dataset);
     var enterText=updateText.enter();
     var exitText=updateText.exit();
+
+     var xScale=d3.scaleBand()
+                 .domain(dataset)
+                 .rangeRound([0,xAxisWidth])
+                 .paddingInner(0.5)
+                 .paddingOuter(0.2);
+
+    var yScale=d3.scaleLinear()
+                 .domain([0,d3.max(dataset)])
+                 .range([0,yAxisWidth]);
+
+//    alert(xScale.step())
     updateRect.attr("fill","steelblue")
             .attr("x",function(d,i){
-                return padding.left+i*rectStep;
+                return padding.left+xScale(d);
             })
             .attr("y",function(d){
-                return height-padding.bottom-d;
+                return height-padding.bottom-yScale(d);
             })
-            .attr("width",rectWidth)
+            .attr("width",xScale.bandwidth())
             .attr("height",function(d){
-                return d;
+                return yScale(d);
             });
 
     enterRect.append("rect")
             .attr("fill","steelblue")
             .attr("x",function(d,i){
-                return padding.left+i*rectStep;
+                return padding.left+xScale(d);
             })
             .attr("y",function(d){
-                return height-padding.bottom-d;
+                return height-padding.bottom-yScale(d);
             })
-            .attr("width",rectWidth)
+            .attr("width",xScale.bandwidth())
             .attr("height",function(d){
-                return d;
+                return yScale(d);
             });
     exitRect.remove();
     updateText.attr("fill","white")
             .attr("font-size","14px")
             .attr("text-anchor","middle")
             .attr("x",function(d,i){
-                return padding.left+i*rectStep;
+                return padding.left+xScale(d);
             })
             .attr("y",function(d){
-                return height-padding.bottom-d;
+                return height-padding.bottom-yScale(d);
             })
-            .attr("dx",rectWidth/2)
+            .attr("dx",xScale.bandwidth()/2)
             .attr("dy","1em")
             .text(function(d){
                 return d;
@@ -61,27 +79,75 @@ function draw(){
             .attr("font-size","14px")
             .attr("text-anchor","middle")
             .attr("x",function(d,i){
-                return padding.left+i*rectStep;
+                return padding.left+xScale(d);
             })
             .attr("y",function(d){
-                return height-padding.bottom-d;
+                return height-padding.bottom-yScale(d);
             })
-            .attr("dx",rectWidth/2)
+            .attr("dx",xScale.bandwidth()/2)
             .attr("dy","1em")
             .text(function(d){
                 return d;
             });
     exitText.remove();
 
+    var xAxis = d3.axisBottom().scale(xScale).tickSizeOuter(0);
+    yScale.range([yAxisWidth,0]);
+    var yAxis=d3.axisLeft().scale(yScale).tickSizeOuter(0).tickFormat(d3.format("$0.1f"));
+    svg.append("g").attr("class","axis").attr("transform","translate("+padding.left+","+(height-padding.bottom)+")").call(xAxis);
+    svg.append("g").attr("class","axis").attr("transform","translate("+padding.left+","+(height-padding.bottom-yAxisWidth)+")").call(yAxis);
+
+
+
 }
-$("#sort").on("click",function(){
-        dataset.sort(d3.ascending);
-        draw();
-});
-$("#add").on("click",function(){
-    dataset.push(Math.floor(Math.random()*100));
-    draw();
-});
+function draw2(){
+//    d3.select("svg").remove();
+    var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+    var updateCircle=svg.selectAll(".circle").data(center);
+    var enterCircle=updateCircle.enter();
+    var exitCircle=updateCircle.exit();
+
+
+     var xScale=d3.scaleLinear()
+                  .domain([0,1.2*d3.max(center,function(d){return d[0]})])
+                  .range([0,xAxisWidth]);
+
+    var yScale=d3.scaleLinear()
+                 .domain([0,1.2*d3.max(center,function(d){return d[1]})])
+                 .range([0,yAxisWidth]);
+
+    updateCircle.attr("fill","black")
+            .attr("cx",function(d){
+                return padding.left+xScale(d[0]);
+            })
+            .attr("cy",function(d){
+                return height-padding.bottom-yScale(d[1]);
+            })
+            .attr("r",5);
+
+
+    enterCircle.append("circle")
+           .attr("fill","black")
+           .attr("cx",function(d){
+                return padding.left+xScale(d[0]);
+            })
+            .attr("cy",function(d){
+                return height-padding.bottom-yScale(d[1]);
+            })
+            .attr("r",5);
+    exitCircle.remove();
+
+
+    var xAxis = d3.axisBottom().scale(xScale).tickSizeOuter(0);
+    yScale.range([yAxisWidth,0]);
+    var yAxis=d3.axisLeft().scale(yScale).tickSizeOuter(0);
+    svg.append("g").attr("class","axis").attr("transform","translate("+padding.left+","+(height-padding.bottom)+")").call(xAxis);
+    svg.append("g").attr("class","axis").attr("transform","translate("+padding.left+","+(height-padding.bottom-yAxisWidth)+")").call(yAxis);
+
+
+
+}
+
 
 function scale(){
     var svg=d3.select("body").append("svg")
@@ -123,5 +189,20 @@ function scale2(){
 
     var gAxis=svg.append("g").attr("transform","translate(80,80)");
     gAxis.call(axis);
+}
+
+function eventBinding(){
+$("#sort").on("click",function(){
+        dataset.sort(d3.ascending);
+        draw();
+});
+$("#add").on("click",function(){
+    dataset.push(Math.floor(Math.random()*100));
+    draw();
+});
+$("#example1").on("click",function(){
+    draw();
+    draw2();
+});
 }
 })
