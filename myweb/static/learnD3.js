@@ -14,7 +14,6 @@ var dataset2=[{country:"china",gdp:[[2000,11920],[2001,13170],[2002,14550],[2003
               {country:"japan",gdp:[[2000,47310],[2001,41590],[2002,39800],[2003,43020],[2004,46550],[2005,45710],[2006,43560]]}];
 
 eventBinding();
-draw3();
 function scale(){
     var svg=d3.select("body").append("svg")
               .attr("width",width)
@@ -57,7 +56,7 @@ function scale2(){
 }
 
 function draw(){
-    d3.select("svg").remove();
+    d3.selectAll("svg").remove();
     var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
     var updateRect=svg.selectAll(".rect").data(dataset);
     var enterRect=updateRect.enter();
@@ -190,6 +189,7 @@ function draw2(){
 
 }
 function draw3(){
+   d3.selectAll("svg").remove();
     var maxGdp=0;
     for(var i=0;i<dataset2.length;i++){
     var temp=d3.max(dataset2[i].gdp,function(d){return d[1]});
@@ -252,6 +252,9 @@ $("#add").on("click",function(){
 $("#example1").on("click",function(){
     draw();
     draw2();
+});
+$("#example2").on("click",function(){
+    draw3();
 });
 }
 })
