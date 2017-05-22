@@ -12,7 +12,7 @@ var center=[[0.5,0.5],[0.7,0.8],[0.4,0.9],[0.11,0.32],[0.88,0.25],[0.75,0.12],[0
 
 var dataset2=[{country:"china",gdp:[[2000,11920],[2001,13170],[2002,14550],[2003,16500],[2004,19440],[2005,22870],[2006,27930]]},
               {country:"japan",gdp:[[2000,47310],[2001,41590],[2002,39800],[2003,43020],[2004,46550],[2005,45710],[2006,43560]]}];
-
+draw4()
 eventBinding();
 function scale(){
     var svg=d3.select("body").append("svg")
@@ -236,6 +236,52 @@ function draw3(){
     var yAxis=d3.axisLeft().scale(yScale).tickSizeOuter(0);
     svg.append("g").attr("class","axis").attr("transform","translate("+padding.left+","+(height-padding.bottom)+")").call(xAxis);
     svg.append("g").attr("class","axis").attr("transform","translate("+padding.left+","+(padding.top)+")").call(yAxis);
+}
+function draw4(){
+    d3.selectAll("svg").remove();
+    var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+    svg.append("rect")
+        .attr("fill","steelblue")
+        .attr("x",10)
+        .attr("y",10)
+        .attr("width",100)
+        .attr("height",30)
+        .transition()
+        .delay(500)
+        .duration(1000)
+        .ease(d3.easeBounceIn)
+        .attr("width",300)
+        .transition()
+        .delay(500)
+        .duration(1000)
+        .ease(d3.easeBounceIn)
+        .attr("height",100);
+    var text=svg.append("text")
+        .attr("fill","white")
+        .attr("x",100)
+        .attr("y",10)
+        .attr("dy","1.2em")
+        .attr("text-anchor","end")
+        .text(100)
+     ;
+     console.log(text)
+    var initx=text.attr("x");
+    var initText=text.text();
+    var textTran=text.transition().duration(2000)
+                        .tween("text",function(){
+                        var node = this
+                        return function(t){
+                        node.setAttribute("x",t*300);
+                        node.textContent=t*200;
+                        }
+                     })
+//                     .attrTween("x",function(d,i,a){
+//                        return function(t){
+//                        return t*200+parseInt(initx);
+//                     }
+//                     })
+
+
 }
 
 
