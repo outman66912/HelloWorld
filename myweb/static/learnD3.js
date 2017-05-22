@@ -157,7 +157,7 @@ function draw2(){
                  .domain([0,1.2*d3.max(center,function(d){return d[1]})])
                  .range([0,yAxisWidth]);
 
-    updateCircle.attr("fill","black")
+    updateCircle.attr("fill","black").transition().duration(500)
             .attr("cx",function(d){
                 return padding.left+xScale(d[0]);
             })
@@ -169,6 +169,10 @@ function draw2(){
 
     enterCircle.append("circle")
            .attr("fill","black")
+           .attr("cx",padding.left)
+           .attr("cy",height-padding.bottom)
+           .attr("r",7)
+           .transition().duration(500)
            .attr("cx",function(d){
                 return padding.left+xScale(d[0]);
             })
@@ -176,7 +180,7 @@ function draw2(){
                 return height-padding.bottom-yScale(d[1]);
             })
             .attr("r",5);
-    exitCircle.remove();
+    exitCircle.transition().duration(500).attr("fill","white").remove();
 
 
     var xAxis = d3.axisBottom().scale(xScale).tickSizeOuter(0);
