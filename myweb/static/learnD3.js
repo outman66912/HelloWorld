@@ -12,7 +12,9 @@ var center=[[0.5,0.5],[0.7,0.8],[0.4,0.9],[0.11,0.32],[0.88,0.25],[0.75,0.12],[0
 
 var dataset2=[{country:"china",gdp:[[2000,11920],[2001,13170],[2002,14550],[2003,16500],[2004,19440],[2005,22870],[2006,27930]]},
               {country:"japan",gdp:[[2000,47310],[2001,41590],[2002,39800],[2003,43020],[2004,46550],[2005,45710],[2006,43560]]}];
-draw4()
+
+var timeText;
+draw5()
 eventBinding();
 function scale(){
     var svg=d3.select("body").append("svg")
@@ -99,6 +101,10 @@ function draw(){
             .attr("width",xScale.bandwidth())
             .attr("height",function(d){
                 return yScale(d);
+            }).on("mouseover",function(d,i){
+                d3.select(this).transition().duration(100).attr("fill","yellow");
+            }).on("mouseout",function(d,i){
+                d3.select(this).transition().duration(500).attr("fill","steelblue");
             });
     exitRect.remove();
     updateText.attr("fill","white")
@@ -138,11 +144,26 @@ function draw(){
     svg.append("g").attr("class","axis").attr("transform","translate("+padding.left+","+(height-padding.bottom)+")").call(xAxis);
     svg.append("g").attr("class","axis").attr("transform","translate("+padding.left+","+(height-padding.bottom-yAxisWidth)+")").call(yAxis);
 
-
+//    var circle=svg.append("circle")
+//                   .attr("cx","100")
+//                   .attr("cy","100")
+//                   .attr("r","50")
+//                   .attr("fill","blue")
+//                   .on("touchstart",function(){
+//                        d3.select(this).attr("fill","yellow");
+//                   })
+//                   .on("touchmove",function(){
+//                        var pos=d3.touches(this)[0];
+//                        d3.select(this).attr("cx",pos[0])
+//                                        .attr("cy",pos[1]);
+//                   })
+//                   .on("touchend",function(){
+//                        d3.select(this).attr("fill","blue");
+//                   });
 
 }
 function draw2(){
-//    d3.select("svg").remove();
+    d3.selectAll("svg").remove();
     var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
     var updateCircle=svg.selectAll(".circle").data(center);
     var enterCircle=updateCircle.enter();
@@ -268,7 +289,6 @@ function draw4(){
         .attr("text-anchor","end")
         .text(100)
      ;
-     console.log(text)
     var initx=text.attr("x");
     var initText=text.text();
     var textTran=text.transition().duration(2000)
@@ -284,12 +304,130 @@ function draw4(){
 //                        return t*200+parseInt(initx);
 //                     }
 //                     })
+//==============================================================// 时钟
 
+    timeText=svg.append("text")
+                .attr("x","0")
+                .attr("y","200")
+                .attr("class","time")
+                .text(getTimeString());
+     setInterval(updateTime,1000);
 
 }
+function draw5(){
+var circle=[{cx:50,cy:200,r:30},{cx:250,cy:200,r:30}];
+var circle2=[{cx:150,cy:200,r:30},{cx:220,cy:200,r:30},{cx:150,cy:270,r:30},{cx:220,cy:270,r:30}];
+  d3.selectAll("svg").remove();
+  var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+  var circles=svg.selectAll(".circle")
+     .data(circle)
+     .enter()
+     .append("circle")
+     .attr("cx",function(d){return d.cx})
+     .attr("cy",function(d){return d.cy})
+     .attr("r",function(d){return d.r})
+     .attr("fill","black");
 
 
+  var drag=d3.drag()
 
+             .on("start",function(d){console.log("bbbbb")})
+             .on("end",function(d){console.log("eeeee")})
+             .on("drag",function(d){
+                d3.select(this).attr("cx",d.cx=d3.event.x)
+                               .attr("cy",d.cy=d3.event.y)
+             });
+    drag(circles);
+    //====================================缩放
+    var g=svg.append("g");
+    g.selectAll(".circle")
+    .data(circle2)
+    .enter()
+    .append("circle")
+    .attr("cx",function(d){return d.cx;})
+    .attr("cy",function(d){return d.cy;})
+    .attr("r",function(d){return d.r;})
+    .attr("fill","black");
+      var xScale=d3.scaleLinear()
+                .domain([0,width])
+                .range([0,width]);
+
+      var yScale=d3.scaleLinear()
+                .domain([0,height])
+                .range([0,height]);
+    var zoom=d3.zoom()
+               .scaleExtent([1,10])
+               .on("zoom",function(d){
+                    d3.select(this).attr("transform",d3.event.transform);
+               });
+
+    zoom(g);
+}
+function updateTime(){
+    timeText.text(getTimeString());
+}
+function getTimeString(){
+    var time=new Date();
+    var year = time.getFullYear();
+    var month = 1 + time.getMonth();
+    var day = time.getDate();
+    var hours=time.getHours();
+    var minutes=time.getMinutes();
+    var seconds=time.getSeconds();
+    month=month<10?"0"+month:month;
+    day=day<10?"0"+day:day;
+    hours=hours<10?"0"+hours:hours;
+    minutes=minutes<10?"0"+minutes:minutes;
+    seconds=seconds<10?"0"+seconds:seconds;
+    return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
+
+}
+function temp1(){
+var svg=d3.select("svg");
+
+     var xScale=d3.scaleLinear()
+                  .domain([0,1.2*d3.max(center,function(d){return d[0]})])
+                  .range([0,xAxisWidth]);
+
+    var yScale=d3.scaleLinear()
+                 .domain([0,1.2*d3.max(center,function(d){return d[1]})])
+                 .range([0,yAxisWidth]);
+  var updateCircle=svg.selectAll("circle").data(center);
+    var enterCircle=updateCircle.enter();
+    var exitCircle=updateCircle.exit();
+        updateCircle.attr("fill","black").transition().duration(500)
+            .attr("cx",function(d){
+                return padding.left+xScale(d[0]);
+            })
+            .attr("cy",function(d){
+                return height-padding.bottom-yScale(d[1]);
+            })
+            .attr("r",5);
+
+
+    enterCircle.append("circle")
+           .attr("fill","black")
+           .attr("cx",padding.left)
+           .attr("cy",height-padding.bottom)
+           .attr("r",7)
+           .transition().duration(500)
+           .attr("cx",function(d){
+                return padding.left+xScale(d[0]);
+            })
+            .attr("cy",function(d){
+                return height-padding.bottom-yScale(d[1]);
+            })
+            .attr("r",5);
+    exitCircle.transition().duration(500).attr("fill","white").remove();
+}
+
+function hideButton(){
+    $("#sort").hide();
+    $("#add").hide();
+    $("#updatecircle").hide();
+    $("#addcircle").hide();
+    $("#removecircle").hide();
+}
 function eventBinding(){
 $("#sort").on("click",function(){
         dataset.sort(d3.ascending);
@@ -299,12 +437,45 @@ $("#add").on("click",function(){
     dataset.push(Math.floor(Math.random()*100));
     draw();
 });
+
+$("#updatecircle").on("click",function(){
+   for(var i=0;i<center.length;i++){
+        center[i][0]=Math.random();
+        center[i][1]=Math.random();
+   }
+   temp1();
+});
+$("#addcircle").on("click",function(){
+    center.push([Math.random(),Math.random()]);
+   temp1();
+});
+$("#removecircle").on("click",function(){
+    center.pop();
+    temp1();
+});
+
 $("#example1").on("click",function(){
+    hideButton();
     draw();
-    draw2();
+    $("#sort").show();
+    $("#add").show();
 });
 $("#example2").on("click",function(){
+    hideButton();
     draw3();
 });
+$("#example3").on("click",function(){
+    hideButton();
+    draw2();
+    $("#updatecircle").show();
+    $("#addcircle").show();
+    $("#removecircle").show();
+});
+
+$("#example4").on("click",function(){
+    hideButton();
+    draw4();
+});
+
 }
 })
