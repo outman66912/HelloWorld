@@ -14,8 +14,42 @@ var dataset2=[{country:"china",gdp:[[2000,11920],[2001,13170],[2002,14550],[2003
               {country:"japan",gdp:[[2000,47310],[2001,41590],[2002,39800],[2003,43020],[2004,46550],[2005,45710],[2006,43560]]}];
 
 var timeText;
-draw5()
 eventBinding();
+pie();
+function pie(){
+    d3.selectAll("svg").remove();
+    var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+    var dataset=[["小米",60.8],["三星",58.4],["联想",47.3],["苹果",46.6],["华为",41.3],["酷派",40.1],["其他",111.5]];
+    var pie=d3.pie()
+              .value(function(d){return d[1]});
+    var piedata=pie(dataset);
+    var arc=d3.arc()
+              .innerRadius(0)
+              .outerRadius(width/3);
+    var color=d3.schemeCategory20;
+    var arcs=svg.selectAll("g")
+                .data(piedata)
+                .enter()
+                .append("g")
+                .attr("transform","translate("+width/2+","+height/2+")");
+    arcs.append("path")
+        .attr("fill",function(d,i){return color[i]})
+        .attr("d",function(d){return arc(d)})
+    arcs.append("text")
+        .attr("transform",function(d){
+            var x=arc.centroid(d)[0]*1.4;
+            var y=arc.centroid(d)[1]*1.4;
+            return "translate("+x+","+y+")";
+        })
+        .attr("text-anchor","middle")
+        .text(function(d){
+            var percent=Number(d.value)/d3.sum(dataset,function(d){return d[1]})*100;
+            return percent.toFixed(1)+"%";
+        })
+
+
+
+}
 function scale(){
     var svg=d3.select("body").append("svg")
               .attr("width",width)
@@ -437,7 +471,6 @@ $("#add").on("click",function(){
     dataset.push(Math.floor(Math.random()*100));
     draw();
 });
-
 $("#updatecircle").on("click",function(){
    for(var i=0;i<center.length;i++){
         center[i][0]=Math.random();
@@ -471,11 +504,13 @@ $("#example3").on("click",function(){
     $("#addcircle").show();
     $("#removecircle").show();
 });
-
 $("#example4").on("click",function(){
     hideButton();
     draw4();
 });
-
+$("#example5").on("click",function(){
+    hideButton();
+    draw5();
+});
 }
 })
