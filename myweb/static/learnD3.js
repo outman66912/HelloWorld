@@ -15,12 +15,25 @@ var dataset2=[{country:"china",gdp:[[2000,11920],[2001,13170],[2002,14550],[2003
 
 var timeText;
 eventBinding();
-pie();
+
+function force(){
+    d3.selectAll("svg").remove();
+    var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+    var nodes=[{name:"0"},{name:"1"},{name:"2"},{name:"3"},{name:"4"},{name:"5"},{name:"6"}];
+    var edges=[{source:0,target:1},{source:0,target:2},{source:0,target:3},{source:1,target:4},{source:1,target:5},{source:1,target:6}];
+    var force=d3.force()
+                .nodes(nodes)
+                .links(edges)
+                .size([width,height])
+                .linkDistance(90)
+                .charge(-400);
+    force.start();
+}
 function pie(){
     d3.selectAll("svg").remove();
     var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
     var dataset=[["小米",60.8],["三星",58.4],["联想",47.3],["苹果",46.6],["华为",41.3],["酷派",40.1],["其他",111.5]];
-    var pie=d3.pie()
+    var pie=d3.pie()//.startAngle(Math.PI*0.2).endAngle(Math.PI*1.5)
               .value(function(d){return d[1]});
     var piedata=pie(dataset);
     var arc=d3.arc()
@@ -34,7 +47,7 @@ function pie(){
                 .attr("transform","translate("+width/2+","+height/2+")");
     arcs.append("path")
         .attr("fill",function(d,i){return color[i]})
-        .attr("d",function(d){return arc(d)})
+        .attr("d",function(d){return arc(d)});
     arcs.append("text")
         .attr("transform",function(d){
             var x=arc.centroid(d)[0]*1.4;
@@ -45,8 +58,24 @@ function pie(){
         .text(function(d){
             var percent=Number(d.value)/d3.sum(dataset,function(d){return d[1]})*100;
             return percent.toFixed(1)+"%";
-        })
+        });
+    arcs.append("line")
+        .attr("stroke","black")
+        .attr("x1",function(d){return arc.centroid(d)[0]*2})
+        .attr("y1",function(d){return arc.centroid(d)[1]*2})
+        .attr("x2",function(d){return arc.centroid(d)[0]*2.2})
+        .attr("y2",function(d){return arc.centroid(d)[1]*2.2});
 
+    arcs.append("text")
+        .attr("transform",function(d){
+            var x=arc.centroid(d)[0]*2.5;
+            var y=arc.centroid(d)[1]*2.5;
+            return "translate("+x+","+y+")";
+        })
+        .attr("text-anchor","middle")
+         .text(function(d){
+            return d.data[0];
+        });
 
 
 }
@@ -511,6 +540,11 @@ $("#example4").on("click",function(){
 $("#example5").on("click",function(){
     hideButton();
     draw5();
+});
+
+$("#example6").on("click",function(){
+    hideButton();
+    pie();
 });
 }
 })
