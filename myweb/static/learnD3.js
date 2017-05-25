@@ -15,19 +15,117 @@ var dataset2=[{country:"china",gdp:[[2000,11920],[2001,13170],[2002,14550],[2003
 
 var timeText;
 eventBinding();
+chords();
+function chords(){
+    d3.selectAll("svg").remove();
+    var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+    var continent=["亚洲","欧洲","非洲","美洲","大洋洲"];
+    var population=[[9000,870,3000,1000,5200],[3400,8000,2300,4922,374],
+                    [2000,2000,7700,4881,1050],[3000,8012,5531,500,400],[3540,4310,1500,1900,300]];
+    var chord=d3.chord().padAngle(0.03).sortSubgroups(d3.descending);
+    var chordData=chord(population);
+    var gChord=svg.append("g").attr("transform","translate("+width/2+","+height/2+")");
+    var gOuter=gChord.append("g");
+    var gInner=gChord.append("g");
+    var color=d3.schemeCategory20;
+    var innerRadius=width/2*0.7;
+    var outerRadius=innerRadius*1.1;
+    var arcOuter=d3.arc().innerRadius(innerRadius).outerRadius(outerRadius);
+    gOuter.selectAll(".outPath")
+          .data(chordData.groups)
+          .enter()
+          .append("path")
+          .attr("fill",function(d,i){return color[i]})
+          .attr("d",arcOuter);
 
-function force(){
+    gOuter.selectAll(".outerText")
+          .data(chordData.groups)
+          .enter()
+          .append("text")
+          .each(function(d,i){
+            d.angle=(d.startAngle+d.endAngle)/2;
+            d.name=continent[i];
+          }).attr("dy",".35em")
+          .attr("transform",function(d){
+            var result="rotate("+(d.angle*180/Math.PI)+")";
+            result+=" translate(0,"+(-1.0*(outerRadius+10))+")";
+            return result;
+          })
+          .text(function(d){return d.name});
+
+}
+function forces(){
     d3.selectAll("svg").remove();
     var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
     var nodes=[{name:"0"},{name:"1"},{name:"2"},{name:"3"},{name:"4"},{name:"5"},{name:"6"}];
     var edges=[{source:0,target:1},{source:0,target:2},{source:0,target:3},{source:1,target:4},{source:1,target:5},{source:1,target:6}];
-    var force=d3.force()
-                .nodes(nodes)
-                .links(edges)
-                .size([width,height])
-                .linkDistance(90)
-                .charge(-400);
-    force.start();
+    var force=d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(edges).id(function(d) { return d.name; }).distance(50)) //distance  线长度
+                .force("charge", d3.forceManyBody().strength(-60)) //strength正吸引 负排斥
+                .force("center", d3.forceCenter(width / 2, height / 2));
+//    force.force("link").links(edges);
+    var color=d3.schemeCategory20;
+    var lines=svg.selectAll(".forceLine")
+                 .data(edges)
+                 .enter()
+                 .append("line")
+                 .attr("class","forceLine");
+    var circles=svg.selectAll(".forceCircle")
+                   .data(nodes)
+                   .enter()
+                   .append("circle")
+                   .attr("class","forceCircle")
+                   .attr("r",10)
+                   .attr("fill",function(d,i){return color[i]})
+                   .call(d3.drag().on("start", dragstarted)
+                                  .on("drag", dragged)
+                                  .on("end", dragended));
+      circles.append("title")
+      .text(function(d) { return d.name; });
+
+    var texts=svg.selectAll(".forceText")
+                .data(nodes)
+                .enter()
+                .append("text")
+                .attr("class","forceText")
+                .attr("x",function(d){return d.x})
+                .attr("y",function(d){return d.y})
+                .attr("dy","1em")
+                .text(function(d){d.name});
+
+    force.on("tick",function(){
+        lines.attr("x1",function(d){return d.source.x});
+        lines.attr("y1",function(d){return d.source.y});
+        lines.attr("x2",function(d){return d.target.x});
+        lines.attr("y2",function(d){return d.target.y});
+
+        circles.attr("cx",function(d){return d.x});
+        circles.attr("cy",function(d){return d.y});
+
+        texts.attr("x",function(d){return d.x});
+        texts.attr("y",function(d){return d.y});
+    });
+
+    function dragstarted(d) {
+    if (!d3.event.active) force.alphaTarget(0.4).restart();
+     d.fx = d.x;
+     d.fy = d.y;
+
+    }
+
+    function dragged(d) {
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
+    d3.select(this).attr("fill","yellow")
+    }
+
+    function dragended(d,i) {
+    if (!d3.event.active) force.alphaTarget(0);
+      d.fx = null;
+      d.fy = null;
+      d3.select(this).attr("fill",color[i])
+     }
+
 }
 function pie(){
     d3.selectAll("svg").remove();
@@ -545,6 +643,10 @@ $("#example5").on("click",function(){
 $("#example6").on("click",function(){
     hideButton();
     pie();
+});
+$("#example7").on("click",function(){
+    hideButton();
+    forces();
 });
 }
 })

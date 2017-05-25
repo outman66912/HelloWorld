@@ -4,3 +4,19 @@
     stroke:black;
     stroke-width:2;
 }
+
+.forceLine{
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+
+.forceCircle{
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+.forceText{
+    font-family:Cursive;
+    font-size:40px;
+    stroke:black;
+    stroke-width:2;
+}
