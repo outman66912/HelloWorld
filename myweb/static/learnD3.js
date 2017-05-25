@@ -15,7 +15,44 @@ var dataset2=[{country:"china",gdp:[[2000,11920],[2001,13170],[2002,14550],[2003
 
 var timeText;
 eventBinding();
-chords();
+trees();
+function trees(){
+    d3.selectAll("svg").remove();
+    var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+    var cityJson={
+        name:"中国",
+        children:[
+            {name:"浙江",
+            children:[
+                {name:"杭州"},
+                {name:"宁波"},
+                {name:"温州"},
+                {name:"绍兴"}
+            ]},
+            {name:"广西",
+             children:[
+                {name:"桂林",
+                 children:[
+                    {name:"秀峰区"},
+                    {name:"得出区"},
+                    {name:"像山区"},
+                    {name:"七星区"}
+                 ]
+                 },
+                {name:"南宁"},
+                {name:"柳州"},
+                {name:"防城"}
+            ]
+            }
+        ]
+    };
+    var tree=d3.tree()
+               .size([width,height-200])
+               .separation(function(a,b){return (a.parent==b.parent?1:2)});
+
+    var nodes=tree.nodes(cityJson);
+    var links=tree.links(nodes);
+}
 function chords(){
     d3.selectAll("svg").remove();
     var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
@@ -31,13 +68,24 @@ function chords(){
     var innerRadius=width/2*0.7;
     var outerRadius=innerRadius*1.1;
     var arcOuter=d3.arc().innerRadius(innerRadius).outerRadius(outerRadius);
+
     gOuter.selectAll(".outPath")
           .data(chordData.groups)
           .enter()
           .append("path")
           .attr("fill",function(d,i){return color[i]})
-          .attr("d",arcOuter);
-
+          .attr("d",arcOuter)
+          .attr("class","outPath")
+          .on("mouseover",fade(0.0))
+          .on("mouseout",fade(1.0));
+   function fade(value){
+        return function(d,i){
+            gInner.selectAll(".innerPath")
+                  .filter(function(d){return d.source.index!=i&&d.target.index!=i;})
+                  .transition()
+                  .attr("opacity",value);
+        }
+    }
     gOuter.selectAll(".outerText")
           .data(chordData.groups)
           .enter()
@@ -49,9 +97,21 @@ function chords(){
           .attr("transform",function(d){
             var result="rotate("+(d.angle*180/Math.PI)+")";
             result+=" translate(0,"+(-1.0*(outerRadius+10))+")";
+            if(d.angle>Math.PI*3/4&&d.angle<Math.PI*5/4){
+                result+=" rotate(180)";
+            }
             return result;
           })
           .text(function(d){return d.name});
+
+    var ribbon = d3.ribbon().radius(innerRadius);
+    gInner.selectAll(".innerPath")
+           .data(chordData)
+           .enter()
+           .append("path")
+           .attr("d",ribbon)
+           .attr("class","innerPath")
+           .attr("fill",function(d){return color[d.source.index]})
 
 }
 function forces(){
@@ -527,6 +587,7 @@ var circle2=[{cx:150,cy:200,r:30},{cx:220,cy:200,r:30},{cx:150,cy:270,r:30},{cx:
 function updateTime(){
     timeText.text(getTimeString());
 }
+
 function getTimeString(){
     var time=new Date();
     var year = time.getFullYear();
@@ -647,6 +708,14 @@ $("#example6").on("click",function(){
 $("#example7").on("click",function(){
     hideButton();
     forces();
+});
+$("#example8").on("click",function(){
+    hideButton();
+    chords();
+});
+$("#example9").on("click",function(){
+    hideButton();
+    trees();
 });
 }
 })
