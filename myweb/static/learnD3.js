@@ -19,39 +19,44 @@ trees();
 function trees(){
     d3.selectAll("svg").remove();
     var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
-    var cityJson={
-        name:"中国",
-        children:[
-            {name:"浙江",
-            children:[
-                {name:"杭州"},
-                {name:"宁波"},
-                {name:"温州"},
-                {name:"绍兴"}
-            ]},
-            {name:"广西",
-             children:[
-                {name:"桂林",
-                 children:[
-                    {name:"秀峰区"},
-                    {name:"得出区"},
-                    {name:"像山区"},
-                    {name:"七星区"}
-                 ]
-                 },
-                {name:"南宁"},
-                {name:"柳州"},
-                {name:"防城"}
-            ]
-            }
-        ]
-    };
+    var cityJson=[
+  {"name": "Eve",   "parent": ""},
+  {"name": "Cain",  "parent": "Eve"},
+  {"name": "Seth",  "parent": "Eve"},
+  {"name": "Enos",  "parent": "Seth"},
+  {"name": "Noam",  "parent": "Seth"},
+  {"name": "Abel",  "parent": "Eve"},
+  {"name": "Awan",  "parent": "Eve"},
+  {"name": "Enoch", "parent": "Awan"},
+  {"name": "Azura", "parent": "Eve"}
+];
+    var stratify=d3.stratify()
+                   .id(function(d) { return d.name; })
+                   .parentId(function(d) { return d.parent; });
+
     var tree=d3.tree()
                .size([width,height-200])
                .separation(function(a,b){return (a.parent==b.parent?1:2)});
+    var root = tree(stratify(cityJson));
+//    var diagonal= d3.linkRadial().angle(function(d) { return d.x; }).radius(function(d) { return d.y; })
+//    var link=svg.selectAll(".link")
+//                .data(root.links())
+//                .enter().append("path")
+//                .attr("class", "link")
+//                .attr("d",diagonal);
 
-    var nodes=tree.nodes(cityJson);
-    var links=tree.links(nodes);
+    var node=svg.selectAll(".node")
+                .data(root.descendants())
+                .enter()
+                .append("g")
+                .attr("class","node")
+                .attr("transform",function(d){return "translate("+d.y+","+d.x+")"});
+
+    node.append("circle").attr("r",4.5);
+    node.append("text").attr("dx",8).attr("dy",3)
+                       .style("text-anchor",function(d){return "start"})
+                       .text(function(d){return d.name});
+
 }
 function chords(){
     d3.selectAll("svg").remove();
