@@ -1,6 +1,6 @@
 $(function(){
-var width=400;
-var height=400;
+var width=960;
+var height=1060;
 var padding={top:20,right:20,bottom:20,left:80}
 var rectStep=35;
 var rectWidth=30;
@@ -27,23 +27,22 @@ var dataset2=[{country:"china",gdp:[[2000,11920],[2001,13170],[2002,14550],[2003
 
 var timeText;
 eventBinding();
-cluster();
+
 function cluster(){
         var stratify=d3.stratify()
                    .id(function(d) { return d.name; })
                    .parentId(function(d) { return d.parent; });
 
     var tree=d3.tree()
-               .size([2 * Math.PI,height-100])
+               .size([2 * Math.PI,200])
                .separation(function(a,b){return (a.parent==b.parent?1:2)/a.depth});
     var root = tree(stratify(cityJson));
      var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
-    g = svg.append("g").attr("transform", "translate(40,0)");
+    g = svg.append("g").attr("transform", "translate(200,200)");
     var link=g.selectAll(".link")
                 .data(root.links())
                 .enter().append("path")
                 .attr("class", "link")
-                .transition().duration(500)
                 .attr("d",d3.linkRadial()
           .angle(function(d) { return d.x; })
           .radius(function(d) { return d.y; }));
@@ -53,12 +52,17 @@ function cluster(){
                 .enter()
                 .append("g")
                 .attr("class","node--internal")
-                .attr("transform",function(d){return "translate("+d.y+","+d.x+")"});
+                .attr("transform",function(d){return "translate("+ radialPoint(d.x, d.y)+")"});
 
     node.append("circle").attr("r",4);
-    node.append("text").attr("dx",8).attr("dy",3)
+    node.append("text").attr("x", function(d) { return d.x < Math.PI === !d.children ? 6 : -6; }).attr("dy", "0.31em")
                        .style("text-anchor",function(d){return "start"})
+                       .attr("transform", function(d) { return "rotate(" + (d.x < Math.PI ? d.x - Math.PI / 2 : d.x + Math.PI / 2) * 180 / Math.PI + ")"; })
                        .text(function(d){return d.data.name});
+
+                       function radialPoint(x, y) {
+  return [(y = +y) * Math.cos(x -= Math.PI / 2), y * Math.sin(x)];
+}
 }
 function trees(){
 
@@ -771,6 +775,10 @@ $("#example8").on("click",function(){
 $("#example9").on("click",function(){
     hideButton();
     trees();
+});
+$("#example10").on("click",function(){
+    hideButton();
+    cluster();
 });
 }
 })
