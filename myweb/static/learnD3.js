@@ -13,13 +13,7 @@ var center=[[0.5,0.5],[0.7,0.8],[0.4,0.9],[0.11,0.32],[0.88,0.25],[0.75,0.12],[0
 var dataset2=[{country:"china",gdp:[[2000,11920],[2001,13170],[2002,14550],[2003,16500],[2004,19440],[2005,22870],[2006,27930]]},
               {country:"japan",gdp:[[2000,47310],[2001,41590],[2002,39800],[2003,43020],[2004,46550],[2005,45710],[2006,43560]]}];
 
-var timeText;
-eventBinding();
-trees();
-function trees(){
-    d3.selectAll("svg").remove();
-    var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
-    var cityJson=[
+  var cityJson=[
   {"name": "Eve",   "parent": ""},
   {"name": "Cain",  "parent": "Eve"},
   {"name": "Seth",  "parent": "Eve"},
@@ -30,33 +24,89 @@ function trees(){
   {"name": "Enoch", "parent": "Awan"},
   {"name": "Azura", "parent": "Eve"}
 ];
-    var stratify=d3.stratify()
+
+var timeText;
+eventBinding();
+cluster();
+function cluster(){
+        var stratify=d3.stratify()
                    .id(function(d) { return d.name; })
                    .parentId(function(d) { return d.parent; });
 
     var tree=d3.tree()
-               .size([width,height-200])
-               .separation(function(a,b){return (a.parent==b.parent?1:2)});
+               .size([2 * Math.PI,height-100])
+               .separation(function(a,b){return (a.parent==b.parent?1:2)/a.depth});
     var root = tree(stratify(cityJson));
-//    var diagonal= d3.linkRadial().angle(function(d) { return d.x; }).radius(function(d) { return d.y; })
-//    var link=svg.selectAll(".link")
-//                .data(root.links())
-//                .enter().append("path")
-//                .attr("class", "link")
-//                .attr("d",diagonal);
+     var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+    g = svg.append("g").attr("transform", "translate(40,0)");
+    var link=g.selectAll(".link")
+                .data(root.links())
+                .enter().append("path")
+                .attr("class", "link")
+                .transition().duration(500)
+                .attr("d",d3.linkRadial()
+          .angle(function(d) { return d.x; })
+          .radius(function(d) { return d.y; }));
 
-    var node=svg.selectAll(".node")
+    var node=g.selectAll(".node")
                 .data(root.descendants())
                 .enter()
                 .append("g")
-                .attr("class","node")
+                .attr("class","node--internal")
                 .attr("transform",function(d){return "translate("+d.y+","+d.x+")"});
 
-    node.append("circle").attr("r",4.5);
+    node.append("circle").attr("r",4);
     node.append("text").attr("dx",8).attr("dy",3)
                        .style("text-anchor",function(d){return "start"})
-                       .text(function(d){return d.name});
+                       .text(function(d){return d.data.name});
+}
+function trees(){
 
+
+    var stratify=d3.stratify()
+                   .id(function(d) { return d.name; })
+                   .parentId(function(d) { return d.parent; });
+
+    var tree=d3.cluster()  //tree()      //并排与非并排
+               .size([width,height-200])
+               .separation(function(a,b){return (a.parent==b.parent?1:2)});
+    var root = tree(stratify(cityJson));
+    draw6(root);
+}
+function draw6(root){
+
+d3.selectAll("svg").remove();
+    var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+    g = svg.append("g").attr("transform", "translate(40,0)");
+    var link=g.selectAll(".link")
+                .data(root.links())
+                .enter().append("path")
+                .attr("class", "link")
+                .transition().duration(500)
+                .attr("d",d3.linkHorizontal()
+          .x(function(d) { return d.y; })
+          .y(function(d) { return d.x; }));
+
+    var node=g.selectAll(".node")
+                .data(root.descendants())
+                .enter()
+                .append("g")
+                .attr("class","node--internal")
+                .attr("transform",function(d){return "translate("+d.y+","+d.x+")"})
+                .on("click",function(d){
+                            if(d.children){
+                                d._children=d.children;
+                                d.children=null;
+                             }else{
+                                d.children=d._children;
+                                d._children=null;
+                            };
+                     draw6(root);
+                });
+    node.append("circle").attr("r",4);
+    node.append("text").attr("dx",8).attr("dy",3)
+                       .style("text-anchor",function(d){return "start"})
+                       .text(function(d){return d.data.name});
 }
 function chords(){
     d3.selectAll("svg").remove();
