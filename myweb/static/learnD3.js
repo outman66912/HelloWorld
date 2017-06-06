@@ -55,7 +55,47 @@ var flare={
 }
 var timeText;
 eventBinding();
+partition();
+function partition(){
+    d3.selectAll("svg").remove();
+ var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+ var color = d3.scaleOrdinal(d3.schemeCategory10);
+ var format = d3.format(",d");
+    var root = d3.hierarchy(flare).sum(function(d) { return d.size; });
+     var partition = d3.partition()
+    .size([height, width])
+    .padding(1)
+    .round(true);
 
+
+       var cell = svg
+    .selectAll(".node")
+    .data(partition(root).descendants())
+    .enter().append("g")
+      .attr("class", function(d) { return "node" + (d.children ? " node--internal" : " node--leaf"); })
+      .attr("transform", function(d) { return "translate(" + d.y0 + "," + d.x0 + ")"; });
+
+        cell.append("rect")
+      .attr("id", function(d) { return "rect-" +d.data.name; })
+      .attr("width", function(d) { return d.y1 - d.y0; })
+      .attr("height", function(d) { return d.x1 - d.x0; })
+    .filter(function(d) { return !d.children; })
+      .style("fill", function(d) { while (d.depth > 1) d = d.parent; return color(d.data.name); });
+
+        cell.append("clipPath")
+      .attr("id", function(d) { return "clip-" + d.data.name; })
+    .append("use")
+      .attr("xlink:href", function(d) { return "#rect-" + d.data.name + ""; });
+
+       cell.append("text")
+      .attr("clip-path", function(d) { return "url(#clip-" + d.data.name + ")"; })
+      .attr("x", 4)
+    .selectAll("tspan")
+      .data(function(d) { return [d.data.name, " " + format(d.value)]; })
+    .enter().append("tspan")
+      .attr("y", 13)
+      .text(function(d) { return d; });
+}
 function histogram(){
 d3.selectAll("svg").remove();
  var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
@@ -862,6 +902,18 @@ $("#example11").on("click",function(){
     pack();
 });
 $("#example12").on("click",function(){
+    hideButton();
+    histogram();
+});
+$("#example13").on("click",function(){
+    hideButton();
+    partition();
+});
+$("#example14").on("click",function(){
+    hideButton();
+    histogram();
+});
+$("#example15").on("click",function(){
     hideButton();
     histogram();
 });

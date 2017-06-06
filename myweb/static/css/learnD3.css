@@ -25,7 +25,13 @@
 .node circle {
   fill: #999;
 }
+.node--internal text {
+  font-weight: bold;
+}
 
+.node--leaf rect {
+  fill-opacity: 0.6;
+}
 .node text {
   font: 10px sans-serif;
 }
