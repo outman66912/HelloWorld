@@ -1,6 +1,6 @@
 $(function(){
-var width=960;
-var height=1060;
+var width=400;
+var height=400;
 var padding={top:20,right:20,bottom:20,left:80}
 var rectStep=35;
 var rectWidth=30;
@@ -24,11 +24,88 @@ var dataset2=[{country:"china",gdp:[[2000,11920],[2001,13170],[2002,14550],[2003
   {"name": "Enoch", "parent": "Awan"},
   {"name": "Azura", "parent": "Eve"}
 ];
+var flare={
+ "name": "flare",
+ "children": [
+  {
+   "name": "display",
+   "children": [
+    {"name": "DirtySprite", "size": 8833},
+    {"name": "LineSprite", "size": 1732},
+    {"name": "RectSprite", "size": 3623},
+    {"name": "TextSprite", "size": 10066}
+   ]
+  },
+  {
+   "name": "physics",
+   "children": [
+    {"name": "DragForce", "size": 1082},
+    {"name": "GravityForce", "size": 1336},
+    {"name": "IForce", "size": 319},
+    {"name": "NBodyForce", "size": 10498},
+    {"name": "Particle", "size": 2822},
+    {"name": "Simulation", "size": 9983},
+    {"name": "Spring", "size": 2213},
+    {"name": "SpringForce", "size": 1681}
+   ]
+  }
 
+
+ ]
+}
 var timeText;
 eventBinding();
 
+function histogram(){
+d3.selectAll("svg").remove();
+ var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+var data = d3.range(1000).map(d3.randomBates(10));
+var x = d3.scaleLinear()
+    .rangeRound([0, width]);
+    var bins = d3.histogram()
+    .domain(x.domain())
+    .thresholds(x.ticks(20))
+    (data);
+var y = d3.scaleLinear()
+    .domain([0, d3.max(bins, function(d) { return d.length; })])
+    .range([height, 0]);
+var bar = svg.selectAll(".bar")
+  .data(bins)
+  .enter().append("rect")
+    .attr("class", "bar")
+    .attr("x",function(d){return x(d.x0)})
+    .attr("y",function(d){return y(d.length)})
+.attr("width", x(bins[0].x1) - x(bins[0].x0) - 1)
+    .attr("height", function(d) { return height - y(d.length); });
+
+svg.append("g")
+    .attr("transform", "translate(0,380)")
+    .call(d3.axisBottom(x));
+
+
+}
+function pack(){
+d3.selectAll("svg").remove();
+ var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+  var format = d3.format(",d");
+    var p=d3.pack().size([width,height]);
+    var root = d3.hierarchy(flare).sum(function(d) { return d.size; });
+var node = svg.selectAll(".node")
+    .data(p(root).descendants())
+    .enter().append("g")
+    .attr("class", function(d) { return d.children ? "node" : "leaf node"; })
+    .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+       node.append("circle")
+      .attr("r", function(d) { return d.r; });
+       node.append("title")
+      .text(function(d) { return d.data.name + "\n" + format(d.value); });
+       node.append("text").attr("dy", "0.3em")
+      .text(function(d) { return d.data.name  });
+
+}
 function cluster(){
+d3.selectAll("svg").remove();
         var stratify=d3.stratify()
                    .id(function(d) { return d.name; })
                    .parentId(function(d) { return d.parent; });
@@ -779,6 +856,14 @@ $("#example9").on("click",function(){
 $("#example10").on("click",function(){
     hideButton();
     cluster();
+});
+$("#example11").on("click",function(){
+    hideButton();
+    pack();
+});
+$("#example12").on("click",function(){
+    hideButton();
+    histogram();
 });
 }
 })

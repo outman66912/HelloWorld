@@ -44,3 +44,8 @@
   stroke-opacity: 0.4;
   stroke-width: 1.5px;
 }
+
+.leaf circle {
+  fill: #ff7f0e;
+  fill-opacity: 1;
+}
