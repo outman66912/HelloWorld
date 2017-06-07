@@ -52,10 +52,94 @@ var flare={
 
 
  ]
-}
+};
+
+var data1 = [
+  {month: new Date(2015, 0, 1), apples: 3840, bananas: 1920, cherries: 960, dates: 400},
+  {month: new Date(2015, 1, 1), apples: 1600, bananas: 1440, cherries: 960, dates: 400},
+  {month: new Date(2015, 2, 1), apples:  640, bananas:  960, cherries: 640, dates: 400},
+  {month: new Date(2015, 3, 1), apples:  320, bananas:  480, cherries: 640, dates: 400}
+];
 var timeText;
 eventBinding();
-partition();
+stack();
+function stack(){
+ d3.selectAll("svg").remove();
+ var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+  var color = d3.schemeCategory10;
+var stack = d3.stack()
+    .keys(["apples", "bananas", "cherries", "dates"])
+    .order(d3.stackOrderNone)
+    .offset(d3.stackOffsetNone);
+var series = stack(data1);
+var x = d3.scaleBand()
+    .domain(series[0].map(function(d){return getTimeString(d.data.month)}))
+    .rangeRound([0, width])
+    .padding(0.08);
+    var maxY = d3.max(series, function(y) { return d3.max(y, function(d) { return d[1]; }); });
+ var maxY1 = d3.max(series, function(y) { return d3.max(y, function(d) { return d[1]-d[0]; }); });
+ console.log(maxY1)
+var y = d3.scaleLinear()
+    .domain([0, maxY])
+    .range([height, 0]);
+
+    var group = svg.selectAll(".series")
+  .data(series)
+  .enter().append("g")
+    .attr("fill", function(d, i) { return color[i]; });
+
+    var rect = group.selectAll("rect")
+  .data(function(d) { return d; })
+  .enter().append("rect")
+    .attr("x", function(d, i) { return x(getTimeString(d.data.month)); })
+    .attr("y", height)
+    .attr("width", x.bandwidth())
+    .attr("height", 0);
+
+    rect.transition()
+    .delay(function(d, i) { return i*100; })
+    .attr("y", function(d) { return y(d[1]); })
+    .attr("height", function(d) { return y(d[0]) - y(d[1]); });
+
+    svg.append("g")
+    .attr("class", "axis axis--x")
+    .attr("transform", "translate(0," + 120 + ")")
+    .call(d3.axisBottom(x));
+
+
+    d3.selectAll("input")
+    .on("change", changed);
+    function changed() {
+  if (this.value === "grouped") transitionGrouped();
+  else transitionStacked();
+
+    function transitionGrouped() {
+  y.domain([0, maxY1]);
+  rect.transition()
+      .duration(500)
+      .delay(function(d, i) { return i * 100; })
+      .attr("x", function(d, i) { return x(i) + x.bandwidth() / 4 * this.parentNode.__data__.key; })
+      .attr("width", x.bandwidth() / 4)
+    .transition()
+      .attr("y", function(d) { return y(d[1] - d[0]); })
+      .attr("height", function(d) { return y(0) - y(d[1] - d[0]); });
+
+}
+}
+
+function transitionStacked() {
+  y.domain([0, maxY]);
+  rect.transition()
+      .duration(500)
+      .delay(function(d, i) { return i * 100; })
+      .attr("y", function(d) { return y(d[1]); })
+      .attr("height", function(d) { return y(d[0]) - y(d[1]); })
+    .transition()
+      .attr("x", function(d, i) { return x(getTimeString(d.data.month)); })
+      .attr("width", x.bandwidth());
+}
+
+}
 function partition(){
     d3.selectAll("svg").remove();
  var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
@@ -761,11 +845,11 @@ var circle2=[{cx:150,cy:200,r:30},{cx:220,cy:200,r:30},{cx:150,cy:270,r:30},{cx:
     zoom(g);
 }
 function updateTime(){
-    timeText.text(getTimeString());
+    timeText.text(getTimeString(new Date()));
 }
 
-function getTimeString(){
-    var time=new Date();
+function getTimeString(date){
+    var time=date;
     var year = time.getFullYear();
     var month = 1 + time.getMonth();
     var day = time.getDate();
@@ -849,6 +933,10 @@ $("#addcircle").on("click",function(){
 $("#removecircle").on("click",function(){
     center.pop();
     temp1();
+});
+$("#d1").on("click",function(){
+
+   temp1();
 });
 
 $("#example1").on("click",function(){
