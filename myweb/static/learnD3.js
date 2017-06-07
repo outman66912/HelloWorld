@@ -67,18 +67,22 @@ function stack(){
  d3.selectAll("svg").remove();
  var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
   var color = d3.schemeCategory10;
+
 var stack = d3.stack()
     .keys(["apples", "bananas", "cherries", "dates"])
     .order(d3.stackOrderNone)
     .offset(d3.stackOffsetNone);
+
 var series = stack(data1);
+
 var x = d3.scaleBand()
     .domain(series[0].map(function(d){return getTimeString(d.data.month)}))
     .rangeRound([0, width])
     .padding(0.08);
+
     var maxY = d3.max(series, function(y) { return d3.max(y, function(d) { return d[1]; }); });
  var maxY1 = d3.max(series, function(y) { return d3.max(y, function(d) { return d[1]-d[0]; }); });
- console.log(maxY1)
+
 var y = d3.scaleLinear()
     .domain([0, maxY])
     .range([height, 0]);
@@ -109,11 +113,12 @@ var y = d3.scaleLinear()
 
     d3.selectAll("input")
     .on("change", changed);
+
     function changed() {
   if (this.value === "grouped") transitionGrouped();
   else transitionStacked();
-
-    function transitionGrouped() {
+}
+  function transitionGrouped() {
   y.domain([0, maxY1]);
   rect.transition()
       .duration(500)
@@ -125,8 +130,6 @@ var y = d3.scaleLinear()
       .attr("height", function(d) { return y(0) - y(d[1] - d[0]); });
 
 }
-}
-
 function transitionStacked() {
   y.domain([0, maxY]);
   rect.transition()
