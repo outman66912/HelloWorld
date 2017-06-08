@@ -28,28 +28,56 @@ var flare={
  "name": "flare",
  "children": [
   {
-   "name": "display",
+   "name": "animate",
    "children": [
-    {"name": "DirtySprite", "size": 8833},
-    {"name": "LineSprite", "size": 1732},
-    {"name": "RectSprite", "size": 3623},
-    {"name": "TextSprite", "size": 10066}
+    {"name": "Easing", "size": 17010},
+    {"name": "FunctionSequence", "size": 5842},
+    {
+     "name": "interpolate",
+     "children": [
+      {"name": "ArrayInterpolator", "size": 1983},
+      {"name": "ColorInterpolator", "size": 2047},
+      {"name": "DateInterpolator", "size": 1375},
+      {"name": "Interpolator", "size": 8746},
+      {"name": "MatrixInterpolator", "size": 2202},
+      {"name": "NumberInterpolator", "size": 1382},
+      {"name": "ObjectInterpolator", "size": 1629},
+      {"name": "PointInterpolator", "size": 1675},
+      {"name": "RectangleInterpolator", "size": 2042}
+     ]
+    },
+    {"name": "ISchedulable", "size": 1041},
+    {"name": "Parallel", "size": 5176},
+    {"name": "Pause", "size": 449},
+    {"name": "Scheduler", "size": 5593},
+    {"name": "Sequence", "size": 5534},
+    {"name": "Transition", "size": 9201},
+    {"name": "Transitioner", "size": 19975},
+    {"name": "TransitionEvent", "size": 1116},
+    {"name": "Tween", "size": 6006}
    ]
   },
   {
-   "name": "physics",
+   "name": "data",
    "children": [
-    {"name": "DragForce", "size": 1082},
-    {"name": "GravityForce", "size": 1336},
-    {"name": "IForce", "size": 319},
-    {"name": "NBodyForce", "size": 10498},
-    {"name": "Particle", "size": 2822},
-    {"name": "Simulation", "size": 9983},
-    {"name": "Spring", "size": 2213},
-    {"name": "SpringForce", "size": 1681}
+    {
+     "name": "converters",
+     "children": [
+      {"name": "Converters", "size": 721},
+      {"name": "DelimitedTextConverter", "size": 4294},
+      {"name": "GraphMLConverter", "size": 9800},
+      {"name": "IDataConverter", "size": 1314},
+      {"name": "JSONConverter", "size": 2220}
+     ]
+    },
+    {"name": "DataField", "size": 1759},
+    {"name": "DataSchema", "size": 2165},
+    {"name": "DataSet", "size": 586},
+    {"name": "DataSource", "size": 3331},
+    {"name": "DataTable", "size": 772},
+    {"name": "DataUtil", "size": 3322}
    ]
   }
-
 
  ]
 };
@@ -67,10 +95,96 @@ var data2 = [
 ];
 var timeText;
 eventBinding();
-treeMap();
+
+function topo(){
+d3.selectAll("svg").remove();
+ var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+    d3.json("testp.json",function(err,toporoot){
+ var color = d3.schemeCategory10;
+        var geroot=topojson.feature(toporoot,toporoot.objects.china);
+
+        var groups=svg.append("g");
+        groups.selectAll("path")
+              .data(geroot.features)
+              .enter()
+              .append("path")
+              .style("fill",function(d,i){
+              return color[i];
+              }).attr("d",path)
+    })
+}
 function treeMap(){
 d3.selectAll("svg").remove();
  var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+var fader = function(color) { return d3.interpolateRgb(color, "#fff")(0.2); },
+    color = d3.scaleOrdinal(d3.schemeCategory20.map(fader)),
+    format = d3.format(",d");
+
+   var x = d3.scaleLinear()
+    .range([0, 300]);
+       var y = d3.scaleLinear()
+    .range([300, 0]);
+
+  var root = d3.hierarchy(flare)
+      .eachBefore(function(d) { d.data.id = (d.parent ? d.parent.data.id + "." : "") + d.data.name; })
+      .sum(sumBySize)
+      .sort(function(a, b) { return b.height - a.height || b.value - a.value; });
+ var treemap = d3.treemap()
+    .size([width, height])
+    .padding(1)
+    .round(true);
+
+     treemap(root);
+
+       var cell = svg.selectAll("g")
+    .data(root.leaves())
+    .enter().append("g")
+      .attr("transform", function(d) { return "translate(" + d.x0 + "," + d.y0 + ")"; });
+
+        cell.append("rect")
+      .attr("id", function(d) { return d.data.id; })
+      .attr("width", function(d) { return d.x1 - d.x0; })
+      .attr("height", function(d) { return d.y1 - d.y0; })
+      .attr("fill", function(d) { return color(d.parent.data.id); })
+      .on('click',function(d){return zoom(d.data.id==d.parent.data.id?root:d.parent)});
+
+        cell.append("clipPath")
+      .attr("id", function(d) { return "clip-" + d.data.id; })
+    .append("use")
+      .attr("xlink:href", function(d) { return "#" + d.data.id; });
+
+  cell.append("text")
+      .attr("clip-path", function(d) { return "url(#clip-" + d.data.id + ")"; })
+    .selectAll("tspan")
+      .data(function(d) { return d.data.name.split(/(?=[A-Z][^A-Z])/g); })
+    .enter().append("tspan")
+      .attr("x", 4)
+      .attr("y", function(d, i) { return 13 + i * 10; })
+      .text(function(d) { return d; });
+
+  cell.append("title")
+      .text(function(d) { return d.data.id + "\n" + format(d.value); });
+function sumByCount(d) {
+  return d.children ? 0 : 1;
+}
+
+function sumBySize(d) {
+  return d.size;
+}
+
+function zoom(d){
+console.log(d)
+    var kx=300/(d.x1-d.x0),ky=300/(d.y1-d.y0);
+    x.domain([d.x0,d.x1]);
+    y.domain([d.y0,d.y1]);
+    console.log(kx*(d.x1-d.x0))
+      console.log(ky*(d.y1-d.y0))
+
+    var t=cell.transition().duration(750)
+              .attr("transform",function(d){return "translate(" + x(d.x0) + "," + y(d.y0) + ")"; })
+    t.select("rect").attr("width",function(d){return kx*(d.x1-d.x0)-1}).attr("height",function(d){ky*(d.y1-d.y0)-1})
+}
+
 }
 function stack(){
 
