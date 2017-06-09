@@ -55,3 +55,37 @@
   fill: #ff7f0e;
   fill-opacity: 1;
 }
+
+.tooltip{
+    position:absolute;
+    width:120px;
+    height:auto;
+    font-family:simsun;
+    font-size:14px;
+    color:white;
+    text-align:center;
+    border-style:solid;
+    border-width:2px solid black;
+    background-color:black;
+    border-radius:5px;
+
+}
+
+.tooltip:after{
+  content:'';
+  position:absolute;
+  bottom:100%;
+  left:20%;
+  margin-left:-8px;
+  width:0;
+  height:0;
+  border-bottom:12px solid #000000;
+  border-right:12px solid transparent;
+  border-left: 12px solid transparent;
+
+}
+
+.overlay {
+    fill:none;
+    pointer-events:all;
+}

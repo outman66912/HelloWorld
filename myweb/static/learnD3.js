@@ -672,7 +672,20 @@ function pie(){
             return d.data[0];
         });
 
+    var tooltip=d3.select("body").append("div").attr("class","tooltip").style("opacity",0.0);
+    arcs.on("mouseover",function(d,i){
+        tooltip.html(d.data[0]+"的出货量"+"<br/>"+d.data[1]+" 百万台")
+                .style("left",(d3.event.pageX)+"px")
+                .style("top",(d3.event.pageY+20)+"px")
+                .style("opacity",1.0)
+                .style("box-shadow","10px 0px 0px "+color[i]);
+    }).on("mousemove",function(d){
+        tooltip.style("left",(d3.event.pageX)+"px")
+                .style("top",(d3.event.pageY+20)+"px")
 
+    }).on("mouseout",function(d){
+        tooltip.style("opacity",0.0);
+    })
 }
 function scale(){
     var svg=d3.select("body").append("svg")
@@ -896,6 +909,25 @@ function draw3(){
 
     var colors=[d3.rgb(0,0,255),d3.rgb(0,255,0)];
     var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+        var focusCircle=svg.append("g")
+                       .attr("class","focusCircle")
+                       .style("display","none");
+
+    focusCircle.append("circle")
+               .attr("r",4.5);
+
+    focusCircle.append("text")
+                .attr("dx",10)
+                .attr("dy","1em");
+
+    var focusLine=svg.append("g")
+                     .attr("class","focusLine")
+                     .style("display","none");
+
+    var vLine=focusLine.append("line");
+    var hLine=focusLine.append("line");
+
+
     var updatePath=svg.selectAll(".path").data(dataset2);
     var enterPath=updatePath.enter();
     var exitPath=updatePath.exit();
@@ -919,6 +951,49 @@ function draw3(){
     var yAxis=d3.axisLeft().scale(yScale).tickSizeOuter(0);
     svg.append("g").attr("class","axis").attr("transform","translate("+padding.left+","+(height-padding.bottom)+")").call(xAxis);
     svg.append("g").attr("class","axis").attr("transform","translate("+padding.left+","+(padding.top)+")").call(yAxis);
+    svg.append("rect")
+    .attr("class","overlay")
+    .attr("x",padding.left)
+    .attr("y",padding.top)
+    .attr("width",width-padding.left-padding.right)
+    .attr("height",height-padding.top-padding.bottom)
+    .on("mouseover",function(){
+    alert("11")
+        focusCircle.style("display","block");
+        focusLine.style("display","block");
+    }).on("mouseout",function(){
+    alert("22")
+        focusCircle.style("display","none");
+        focusLine.style("display","none");
+    }).on("mouseover",function(){
+        var data=dataset2[0].gdp;
+        var mouseX=d3.mouse(this)[0]-padding.left;
+        var mouseY=d3.mouse(this)[1]-padding.top;
+        var x0=xScale.invert(mouseX);
+        var y0=yScale.invert(mouseY);
+        x0=Math.round(x0);
+        var bisect=d3.bisector(function(d){return d[0];}).left;
+        var index=bisect(data,x0);
+        var x1=data[index][0];
+        var y1=data[index][1];
+        var focusX=xScale(x1)+padding.left;
+        var focusY=yScale(y1)+padding.top;
+        focusCircle.attr("transform","translate("+focusX+","+focusY+")");
+        focusCircle.select("text").text(x1+"年的GDP:"+y1+"亿美元");
+        vLine.attr("x1",focusX)
+            .attr("y1",focusY)
+            .attr("x2",focusX)
+            .attr("y2",height-padding.bottom);
+
+        hLine.attr("x1",focusX)
+            .attr("y1",focusY)
+            .attr("x2",padding.left)
+            .attr("y2",focusY);
+
+    })
+
+
+
 }
 function draw4(){
     d3.selectAll("svg").remove();
