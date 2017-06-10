@@ -551,17 +551,35 @@ function chords(){
            .attr("fill",function(d){return color[d.source.index]})
 
 }
+
+    var nodes=[{name:"0"},{name:"1"},{name:"2"},{name:"3"},{name:"4"},{name:"5"},{name:"6"},{name:"7"}];
+    var edges=[{source:0,target:1},{source:0,target:2},{source:0,target:3},{source:1,target:4},{source:1,target:5},{source:1,target:6},{source:6,target:7}];
+// var datasource1={"nodeGuid":"4e02be06-77b5-4be6-a6dc-4481911a6222","forElasticSearch":[{"match_uid":"4e02be06-77b5-4be6-a6dc-4481911a6222","source_uid":"4e02be06-77b5-4be6-a6dc-4481911a6222","source_name":"4e02be06-77b5-4be6-a6dc-4481911a6222","source_labelsArray":"faastNode,labelB","target_labelsArray":"faastNode,labelA","source_type":"Main Entity","target_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","target_name":"1d38df85-e37b-4e8f-8358-80c99e336b52","target_type":"Main Entity","rel_type":"rel","rel_count":1}],"forExpand":[{"match_uid":"4e02be06-77b5-4be6-a6dc-4481911a6222","source_uid":"4e02be06-77b5-4be6-a6dc-4481911a6222","source_name":"4e02be06-77b5-4be6-a6dc-4481911a6222","source_labelsArray":"faastNode,labelB","target_labelsArray":"faastNode,labelA","source_type":"Main Entity","target_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","target_name":"1d38df85-e37b-4e8f-8358-80c99e336b52","target_type":"Main Entity","rel_type":"rel","rel_count":1}]}
+// var datasource2={"nodeGuid":"1d38df85-e37b-4e8f-8358-80c99e336b52","forElasticSearch":[{"match_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_name":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_labelsArray":"faastNode,labelA","target_labelsArray":"faastNode,labelB","source_type":"Main Entity","target_uid":"4e02be06-77b5-4be6-3322-4481952a6a0f","target_name":"4e02be06-77b5-4be6-3322-4481952a6a0f","target_type":"Main Entity","rel_type":"rel","rel_count":4},{"match_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_name":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_labelsArray":"faastNode,labelA","target_labelsArray":"faastNode,labelB","source_type":"Main Entity","target_uid":"4e02be06-77b5-4be6-3322-4481911a6a0f","target_name":"4e02be06-77b5-4be6-3322-4481911a6a0f","target_type":"Main Entity","rel_type":"rel","rel_count":4},{"match_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_name":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_labelsArray":"faastNode,labelA","target_labelsArray":"faastNode,labelB","source_type":"Main Entity","target_uid":"4e02be06-77b5-4be6-a6dc-4481911a6222","target_name":"4e02be06-77b5-4be6-a6dc-4481911a6222","target_type":"Main Entity","rel_type":"rel","rel_count":4},{"match_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_name":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_labelsArray":"faastNode,labelA","target_labelsArray":"faastNode,labelB","source_type":"Main Entity","target_uid":"4e02be06-77b5-4be6-a6dc-4481911a6a0f","target_name":"4e02be06-77b5-4be6-a6dc-4481911a6a0f","target_type":"Main Entity","rel_type":"rel","rel_count":4}],"forExpand":[{"match_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_name":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_labelsArray":"faastNode,labelA","target_labelsArray":"faastNode,labelB","source_type":"Main Entity","target_uid":"4e02be06-77b5-4be6-3322-4481952a6a0f","target_name":"4e02be06-77b5-4be6-3322-4481952a6a0f","target_type":"Main Entity","rel_type":"rel","rel_count":4},{"match_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_name":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_labelsArray":"faastNode,labelA","target_labelsArray":"faastNode,labelB","source_type":"Main Entity","target_uid":"4e02be06-77b5-4be6-3322-4481911a6a0f","target_name":"4e02be06-77b5-4be6-3322-4481911a6a0f","target_type":"Main Entity","rel_type":"rel","rel_count":4},{"match_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_name":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_labelsArray":"faastNode,labelA","target_labelsArray":"faastNode,labelB","source_type":"Main Entity","target_uid":"4e02be06-77b5-4be6-a6dc-4481911a6222","target_name":"4e02be06-77b5-4be6-a6dc-4481911a6222","target_type":"Main Entity","rel_type":"rel","rel_count":4},{"match_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_uid":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_name":"1d38df85-e37b-4e8f-8358-80c99e336b52","source_labelsArray":"faastNode,labelA","target_labelsArray":"faastNode,labelB","source_type":"Main Entity","target_uid":"4e02be06-77b5-4be6-a6dc-4481911a6a0f","target_name":"4e02be06-77b5-4be6-a6dc-4481911a6a0f","target_type":"Main Entity","rel_type":"rel","rel_count":4}]}
+//  var datasource=datasource1.forElasticSearch.concat(datasource2.forElasticSearch);
+//  var tempobj={}
+//  var newData=[];
+//     for(var i=0;i<datasource.length;i++){
+//        tempobj[datasource[i].source_uid]=datasource[i].source_name;
+//        tempobj[datasource[i].target_uid]=datasource[i].target_name;
+//        newData.push({source:datasource[i].source_uid,target:datasource[i].target_uid});
+//     }
+//     edges=newData;
+//     nodes=[];
+//     for(var obj in tempobj){
+//        nodes.push({name:obj});
+//     }
+     forces();
 function forces(){
-    d3.selectAll("svg").remove();
-    var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
-    var nodes=[{name:"0"},{name:"1"},{name:"2"},{name:"3"},{name:"4"},{name:"5"},{name:"6"}];
-    var edges=[{source:0,target:1},{source:0,target:2},{source:0,target:3},{source:1,target:4},{source:1,target:5},{source:1,target:6}];
+ d3.selectAll("svg").remove();
+   var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+  var color=d3.schemeCategory20;
     var force=d3.forceSimulation(nodes)
                 .force("link", d3.forceLink(edges).id(function(d) { return d.name; }).distance(50)) //distance  线长度
                 .force("charge", d3.forceManyBody().strength(-60)) //strength正吸引 负排斥
                 .force("center", d3.forceCenter(width / 2, height / 2));
 //    force.force("link").links(edges);
-    var color=d3.schemeCategory20;
+
     var lines=svg.selectAll(".forceLine")
                  .data(edges)
                  .enter()
@@ -574,6 +592,63 @@ function forces(){
                    .attr("class","forceCircle")
                    .attr("r",10)
                    .attr("fill",function(d,i){return color[i]})
+                   .on("click",function(d){
+
+                     if(d.open==null||d.open==0){
+                     d.open=1;
+                                  var temp=[];
+                                  d.extendNodes=[];
+                                  d.extendLines=[];
+                                  temp.push(d.name)
+                                  while(temp.length>0){
+
+                                     var  tempGuid=temp.shift();
+                                         for(var i=0;i<edges.length;i++){
+                                             if(edges[i].target.name==d.name){
+                                                 continue;
+                                               }
+                                             if(edges[i].source.name==tempGuid){
+                                                temp.push(edges[i].target.name);
+                                                 d.extendLines.push(edges[i]);
+                                                 edges.splice(i,1);
+
+                                                 i--;
+                                             }
+                                         }
+
+                                    }
+
+
+                                      for(var j=0;j<nodes.length;j++){
+                                      var flag=false;
+                                       for(var i=0;i<edges.length;i++){
+                                            if(nodes[j].name==""+edges[i].target.name||nodes[j].name==""+edges[i].source.name){
+                                                 flag=true;
+                                                 break;
+                                            }
+                                         }
+                                       if(!flag&&nodes.length>1){
+                                          d.extendNodes.push(nodes[j]);
+                                            nodes.splice(j,1);
+                                            j--;
+                                       }
+                                      }
+
+
+
+                     }else{
+
+                            d.open=0;
+                            nodes=nodes.concat(d.extendNodes);
+                            edges=edges.concat(d.extendLines);
+
+                     }
+
+
+
+                        forces(nodes,edges);
+
+                   })
                    .call(d3.drag().on("start", dragstarted)
                                   .on("drag", dragged)
                                   .on("end", dragended));

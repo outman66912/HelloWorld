@@ -5,4 +5,5 @@ urlpatterns = [
     url(r'^index/', views.index),
     url(r'^home/', views.home),
     url(r'^main/', views.main),
+    url(r'^remi/', views.remi),
 ]

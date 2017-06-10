@@ -11,3 +11,6 @@ def main(request):
 
 def home(request):
     return render_to_response('d3_01.html', {"kk": "uu"})
+
+def remi(request):
+    return render_to_response('remi.html')
