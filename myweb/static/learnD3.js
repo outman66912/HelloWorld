@@ -95,6 +95,8 @@ var data2 = [
 ];
 var timeText;
 eventBinding();
+var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+var path=svg.selectAll("path").append(path).attr("d",d3.path().lineTo(3, 4));
 
 function topo(){
 d3.selectAll("svg").remove();
@@ -579,12 +581,19 @@ function forces(){
                 .force("charge", d3.forceManyBody().strength(-60)) //strength正吸引 负排斥
                 .force("center", d3.forceCenter(width / 2, height / 2));
 //    force.force("link").links(edges);
+//var pp=d3.line();
+    var linePath=d3.line()
+                   .x(function(d){return d.x;})
+                   .y(function(d){return d.y;})
+                   .curve(d3.curveBasis);
 
     var lines=svg.selectAll(".forceLine")
                  .data(edges)
                  .enter()
                  .append("line")
-                 .attr("class","forceLine");
+                 .attr("class","forceLine")
+                 .attr("d",function(d){linePath(d.source)});
+
     var circles=svg.selectAll(".forceCircle")
                    .data(nodes)
                    .enter()
@@ -1164,12 +1173,19 @@ var circle2=[{cx:150,cy:200,r:30},{cx:220,cy:200,r:30},{cx:150,cy:270,r:30},{cx:
                 .domain([0,height])
                 .range([0,height]);
     var zoom=d3.zoom()
-               .scaleExtent([1,10])
+               .scaleExtent([0.5,10])
                .on("zoom",function(d){
-                    d3.select(this).attr("transform",d3.event.transform);
+                    d3.select(this).selectAll("g").attr("transform",d3.event.transform);
                });
 
-    zoom(g);
+    zoom(svg);
+
+   $('#big').on("click",function(){
+   var t = d3.zoomTransform(d3.select("svg"));
+    zoom.scaleBy(svg,t.k*1.1);
+
+   })
+
 }
 function updateTime(){
     timeText.text(getTimeString(new Date()));
