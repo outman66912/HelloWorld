@@ -97,7 +97,7 @@ var timeText;
 eventBinding();
 var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
 var path=svg.selectAll("path").append(path).attr("d",d3.path().lineTo(3, 4));
-
+brush()
 function topo(){
 d3.selectAll("svg").remove();
  var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
@@ -114,6 +114,51 @@ d3.selectAll("svg").remove();
               return color[i];
               }).attr("d",path)
     })
+}
+function brush(){
+    d3.selectAll("svg").remove();
+ var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+var dataset=[];
+for(i=0;i<50;i++){
+    dataset.push([Math.random()*10,Math.random()*10]);
+}
+
+        var xScale=d3.scaleLinear()
+                 .domain([0,10])
+                 .range([padding.left,width-padding.right]);
+         var yScale=d3.scaleLinear()
+                 .domain([10,0])
+                 .range([padding.top,height-padding.bottom]);
+
+var circles=svg.selectAll("circle")
+                .data(dataset)
+                .enter()
+                .append("circle")
+                .attr("cx",function(d){return xScale(d[0])})
+                .attr("cy",function(d){return yScale(d[1])})
+                .attr("r",5)
+                .style("fill","black");
+
+
+var br=d3.brush()
+ .extent([[0, 0], [width, height]])
+         .on("brush",brushed);
+svg.append("g").call(br)
+function brushed(){
+var extent=d3.event.selection;
+var xmin=extent[0][0];
+var xmax=extent[1][0];
+var ymin=extent[0][1];
+var ymax=extent[1][1];
+circles.style("fill",function(d,i){
+    if(xScale(d[0])>=xmin&&xScale(d[0])<=xmax&&yScale(d[1])>=ymin&&yScale(d[1])<=ymax){
+        return "red";
+    }else{
+        return "black";
+    }
+})
+
+}
 }
 function treeMap(){
 d3.selectAll("svg").remove();
@@ -708,8 +753,7 @@ function forces(){
      }
 
 }
-    d3.selectAll("svg").remove();
-    var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+
  var dataset=[["小米",60.8],["三星",58.4],["联想",47.3],["苹果",46.6],["华为",41.3],["酷派",40.1],["其他",111.5]];
     function dragmove(d){
         d.dx+=d3.event.dx;
@@ -718,10 +762,12 @@ function forces(){
     }
     function dragend(d,i){
        dataset.splice(i,1);
+
        pie();
     }
 function pie(){
-
+ d3.selectAll("svg").remove();
+    var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
 
     var pie=d3.pie()//.startAngle(Math.PI*0.2).endAngle(Math.PI*1.5)
               .value(function(d){return d[1]});
@@ -1435,5 +1481,10 @@ $("#example15").on("click",function(){
     hideButton();
     treeMap();
 });
+$("#example16").on("click",function(){
+    hideButton();
+    brush();
+});
+
 }
 })
