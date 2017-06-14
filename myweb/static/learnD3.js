@@ -571,7 +571,7 @@ function chords(){
 //     for(var obj in tempobj){
 //        nodes.push({name:obj});
 //     }
-     forces();
+//     forces();
 function forces(){
  d3.selectAll("svg").remove();
    var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
@@ -708,10 +708,21 @@ function forces(){
      }
 
 }
-function pie(){
     d3.selectAll("svg").remove();
     var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
-    var dataset=[["小米",60.8],["三星",58.4],["联想",47.3],["苹果",46.6],["华为",41.3],["酷派",40.1],["其他",111.5]];
+ var dataset=[["小米",60.8],["三星",58.4],["联想",47.3],["苹果",46.6],["华为",41.3],["酷派",40.1],["其他",111.5]];
+    function dragmove(d){
+        d.dx+=d3.event.dx;
+        d.dy+=d3.event.dy;
+        d3.select(this).attr("transform","translate("+d.dx+","+d.dy+")")
+    }
+    function dragend(d,i){
+       dataset.splice(i,1);
+       pie();
+    }
+function pie(){
+
+
     var pie=d3.pie()//.startAngle(Math.PI*0.2).endAngle(Math.PI*1.5)
               .value(function(d){return d[1]});
     var piedata=pie(dataset);
@@ -719,11 +730,23 @@ function pie(){
               .innerRadius(0)
               .outerRadius(width/3);
     var color=d3.schemeCategory20;
+
+    var drag=d3.drag()
+                .on("drag",dragmove)
+                .on("end",dragend);
+
+
     var arcs=svg.selectAll("g")
                 .data(piedata)
                 .enter()
                 .append("g")
+                .each(function(d){
+                    d.dx=width/2;
+                    d.dy=height/2;
+                })
                 .attr("transform","translate("+width/2+","+height/2+")");
+     arcs.call(drag);
+
     arcs.append("path")
         .attr("fill",function(d,i){return color[i]})
         .attr("d",function(d){return arc(d)});
@@ -968,6 +991,7 @@ function draw2(){
 
 
 }
+
 function draw3(){
    d3.selectAll("svg").remove();
     var maxGdp=0;
@@ -993,6 +1017,10 @@ function draw3(){
 
     var colors=[d3.rgb(0,0,255),d3.rgb(0,255,0)];
     var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+
+
+
+
         var focusCircle=svg.append("g")
                        .attr("class","focusCircle")
                        .style("display","none");
@@ -1011,6 +1039,26 @@ function draw3(){
     var vLine=focusLine.append("line");
     var hLine=focusLine.append("line");
 
+
+    var tooltip=d3.select('body')
+                .append('div')
+                .attr("class","tooltip")
+                .style("opacity",0.0);
+
+    var title=tooltip.append("div")
+                     .attr("class","title");
+
+    var des=tooltip.selectAll(".des")
+                    .data(dataset2)
+                    .enter()
+                    .append("div");
+    var desColor=des.append("div")
+                    .attr("class","desColor");
+    var desText=des.append("div")
+                   .attr("class","desText");
+    var vLine2=svg.append("line")
+                    .attr("class","focusLine")
+                    .style("display","none");
 
     var updatePath=svg.selectAll(".path").data(dataset2);
     var enterPath=updatePath.enter();
@@ -1035,6 +1083,7 @@ function draw3(){
     var yAxis=d3.axisLeft().scale(yScale).tickSizeOuter(0);
     svg.append("g").attr("class","axis").attr("transform","translate("+padding.left+","+(height-padding.bottom)+")").call(xAxis);
     svg.append("g").attr("class","axis").attr("transform","translate("+padding.left+","+(padding.top)+")").call(yAxis);
+
     svg.append("rect")
     .attr("class","overlay")
     .attr("x",padding.left)
@@ -1042,14 +1091,22 @@ function draw3(){
     .attr("width",width-padding.left-padding.right)
     .attr("height",height-padding.top-padding.bottom)
     .on("mouseover",function(){
-    alert("11")
+
         focusCircle.style("display","block");
         focusLine.style("display","block");
+
+        tooltip.style("left",(d3.event.pageX)+"px")
+                .style("top",(d3.event.pageY+20)+"px")
+                .style("opacity",1.0)
+        vLine2.style("display","block");
     }).on("mouseout",function(){
-    alert("22")
+
         focusCircle.style("display","none");
         focusLine.style("display","none");
-    }).on("mouseover",function(){
+
+        tooltip.style("opacity",0.0)
+    }).on("mousemove",function(){
+
         var data=dataset2[0].gdp;
         var mouseX=d3.mouse(this)[0]-padding.left;
         var mouseY=d3.mouse(this)[1]-padding.top;
@@ -1067,12 +1124,41 @@ function draw3(){
         vLine.attr("x1",focusX)
             .attr("y1",focusY)
             .attr("x2",focusX)
-            .attr("y2",height-padding.bottom);
+            .attr("y2",height-padding.bottom)
+            .attr("stroke","red");
 
         hLine.attr("x1",focusX)
             .attr("y1",focusY)
             .attr("x2",padding.left)
-            .attr("y2",focusY);
+            .attr("y2",focusY)
+            .attr("stroke","red");
+
+        var year=x0;
+        var gdp=[];
+        for(var k=0;k<dataset2.length;k++){
+            gdp[k]={
+            country:dataset2[k].country,
+            value:dataset2[k].gdp[index][1]
+            }
+        }
+        title.html("<strong>"+year+"年</strong>");
+        desColor.style("background-color",function(d,i){
+            return colors[i];
+        });
+
+        desText.html(function(d,i){
+            return gdp[i].country+"\t"+"<strong>"+gdp[i].value+"</strong>";
+        });
+
+        tooltip.style("left",(d3.event.pageX)+"px")
+                .style("top",(d3.event.pageY+20)+"px");
+
+        var vlx=xScale(data[index][0])+padding.left;
+        vLine2.attr("x1",vlx)
+        .attr("y1",padding.top)
+        .attr("x2",vlx)
+        .attr("y2",height-padding.bottom);
+
 
     })
 

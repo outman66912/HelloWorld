@@ -85,6 +85,20 @@
 
 }
 
+.tooltip .title{
+    border-bottom:1px solid #000;
+    text-align:center;
+}
+.tooltip .desColor{
+    width:10px;
+    height:10px;
+    float:left;
+    margin:9px 8px 1px 8px;
+}
+
+.tooltip .desText{
+    display:inline;
+}
 .overlay {
     fill:none;
     pointer-events:all;
