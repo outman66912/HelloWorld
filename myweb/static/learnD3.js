@@ -97,7 +97,6 @@ var timeText;
 eventBinding();
 var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
 var path=svg.selectAll("path").append(path).attr("d",d3.path().lineTo(3, 4));
-brush()
 function topo(){
 d3.selectAll("svg").remove();
  var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
