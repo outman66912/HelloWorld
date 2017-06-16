@@ -1,6 +1,6 @@
 $(function(){
-var width=400;
-var height=400;
+var width=960;
+var height=960;
 var padding={top:20,right:20,bottom:20,left:80}
 var rectStep=35;
 var rectWidth=30;
@@ -97,22 +97,65 @@ var timeText;
 eventBinding();
 var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
 var path=svg.selectAll("path").append(path).attr("d",d3.path().lineTo(3, 4));
+topo()
 function topo(){
 d3.selectAll("svg").remove();
  var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
-    d3.json("testp.json",function(err,toporoot){
- var color = d3.schemeCategory10;
-        var geroot=topojson.feature(toporoot,toporoot.objects.china);
+ var λ = d3.scaleLinear()
+    .domain([0, width])
+    .range([-180, 180]);
 
-        var groups=svg.append("g");
-        groups.selectAll("path")
-              .data(geroot.features)
-              .enter()
-              .append("path")
-              .style("fill",function(d,i){
-              return color[i];
-              }).attr("d",path)
-    })
+var φ = d3.scaleLinear()
+    .domain([0, height])
+    .range([90, -90]);
+
+var projection = d3.geoAzimuthalEqualArea()
+    .scale(239)
+    .translate([width / 2, height / 2])
+    .precision(0.1);
+
+var path = d3.geoPath()
+    .projection(projection);
+
+var graticule = d3.geoGraticule();
+
+svg.append("defs").append("path")
+    .datum({type: "Sphere"})
+    .attr("id", "sphere")
+    .attr("d", path);
+
+svg.append("use")
+    .attr("class", "stroke")
+    .attr("xlink:href", "#sphere");
+
+svg.append("use")
+    .attr("class", "fill")
+    .attr("xlink:href", "#sphere");
+
+svg.append("path")
+    .datum(graticule)
+    .attr("class", "graticule")
+    .attr("d", path);
+
+d3.json("/static/world-50m.json", function(error, world) {
+  if (error) throw error;
+
+  svg.insert("path", ".graticule")
+      .datum(topojson.feature(world, world.objects.land))
+      .attr("class", "land")
+      .attr("d", path);
+
+  svg.insert("path", ".graticule")
+      .datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))
+      .attr("class", "boundary")
+      .attr("d", path);
+});
+
+svg.on("mousemove", function() {
+  var p = d3.mouse(this);
+  projection.rotate([λ(p[0]), φ(p[1])]);
+  svg.selectAll("path:not(.foreground)").attr("d", path);
+});
 }
 function brush(){
     d3.selectAll("svg").remove();
